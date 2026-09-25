@@ -1,0 +1,451 @@
+[
+  {
+    "id": 10,
+    "created_on": "2026-09-25 14:27:46",
+    "modified_on": "2026-09-25 14:27:46",
+    "user_id": 1,
+    "object_type": "proxy-host",
+    "object_id": 1,
+    "action": "updated",
+    "meta": {
+      "id": 1,
+      "created_on": "2026-09-25 14:20:16",
+      "modified_on": "2026-09-25 14:20:31",
+      "owner_user_id": 1,
+      "domain_names": [
+        "app.test.local"
+      ],
+      "forward_host": "10.0.0.5",
+      "forward_port": 8080,
+      "access_list_id": 1,
+      "certificate_id": "1",
+      "ssl_forced": true,
+      "caching_enabled": false,
+      "block_exploits": true,
+      "advanced_config": "",
+      "meta": {
+        "nginx_online": true,
+        "nginx_err": null
+      },
+      "allow_websocket_upgrade": false,
+      "http2_support": true,
+      "forward_scheme": "http",
+      "enabled": true,
+      "locations": [
+        {
+          "path": "/api",
+          "forward_scheme": "http",
+          "forward_host": "10.0.0.6",
+          "forward_port": 9000
+        }
+      ],
+      "hsts_enabled": false,
+      "hsts_subdomains": false,
+      "trust_forwarded_proto": false
+    },
+    "user": {
+      "id": 1,
+      "created_on": "2026-09-25 14:19:45",
+      "modified_on": "2026-09-25 14:19:45",
+      "is_deleted": false,
+      "is_disabled": false,
+      "email": "admin@test.local",
+      "name": "Administrator",
+      "nickname": "Admin",
+      "avatar": "",
+      "roles": [
+        "admin"
+      ]
+    }
+  },
+  {
+    "id": 9,
+    "created_on": "2026-09-25 14:21:41",
+    "modified_on": "2026-09-25 14:21:41",
+    "user_id": 1,
+    "object_type": "certificate",
+    "object_id": 1,
+    "action": "updated",
+    "meta": {
+      "id": 1,
+      "domain_names": [
+        "custom.test.local"
+      ],
+      "meta": {
+        "certificate": true,
+        "certificate_key": "-----BEGIN (redacted in fixture)-----"
+      },
+      "nice_name": "My custom"
+    },
+    "user": {
+      "id": 1,
+      "created_on": "2026-09-25 14:19:45",
+      "modified_on": "2026-09-25 14:19:45",
+      "is_deleted": false,
+      "is_disabled": false,
+      "email": "admin@test.local",
+      "name": "Administrator",
+      "nickname": "Admin",
+      "avatar": "",
+      "roles": [
+        "admin"
+      ]
+    }
+  },
+  {
+    "id": 8,
+    "created_on": "2026-09-25 14:20:31",
+    "modified_on": "2026-09-25 14:20:31",
+    "user_id": 1,
+    "object_type": "certificate",
+    "object_id": 1,
+    "action": "created",
+    "meta": {
+      "provider": "other",
+      "nice_name": "My custom",
+      "owner_user_id": 1,
+      "meta": {}
+    },
+    "user": {
+      "id": 1,
+      "created_on": "2026-09-25 14:19:45",
+      "modified_on": "2026-09-25 14:19:45",
+      "is_deleted": false,
+      "is_disabled": false,
+      "email": "admin@test.local",
+      "name": "Administrator",
+      "nickname": "Admin",
+      "avatar": "",
+      "roles": [
+        "admin"
+      ]
+    }
+  },
+  {
+    "id": 7,
+    "created_on": "2026-09-25 14:20:31",
+    "modified_on": "2026-09-25 14:20:31",
+    "user_id": 1,
+    "object_type": "proxy-host",
+    "object_id": 1,
+    "action": "enabled",
+    "meta": {
+      "id": 1,
+      "created_on": "2026-09-25 14:20:16",
+      "modified_on": "2026-09-25 14:20:30",
+      "owner_user_id": 1,
+      "domain_names": [
+        "app.test.local"
+      ],
+      "forward_host": "10.0.0.5",
+      "forward_port": 8080,
+      "access_list_id": 0,
+      "certificate_id": 0,
+      "ssl_forced": false,
+      "caching_enabled": false,
+      "block_exploits": true,
+      "advanced_config": "",
+      "meta": {
+        "nginx_online": true,
+        "nginx_err": null
+      },
+      "allow_websocket_upgrade": false,
+      "http2_support": false,
+      "forward_scheme": "http",
+      "enabled": 1,
+      "locations": [
+        {
+          "path": "/api",
+          "forward_scheme": "http",
+          "forward_host": "10.0.0.6",
+          "forward_port": 9000
+        }
+      ],
+      "hsts_enabled": false,
+      "hsts_subdomains": false,
+      "trust_forwarded_proto": false,
+      "certificate": null,
+      "owner": {
+        "id": 1,
+        "created_on": "2026-09-25 14:19:45",
+        "modified_on": "2026-09-25 14:19:45",
+        "is_disabled": false,
+        "email": "admin@test.local",
+        "name": "Administrator",
+        "nickname": "Admin",
+        "avatar": "",
+        "roles": [
+          "admin"
+        ]
+      },
+      "access_list": null
+    },
+    "user": {
+      "id": 1,
+      "created_on": "2026-09-25 14:19:45",
+      "modified_on": "2026-09-25 14:19:45",
+      "is_deleted": false,
+      "is_disabled": false,
+      "email": "admin@test.local",
+      "name": "Administrator",
+      "nickname": "Admin",
+      "avatar": "",
+      "roles": [
+        "admin"
+      ]
+    }
+  },
+  {
+    "id": 6,
+    "created_on": "2026-09-25 14:20:31",
+    "modified_on": "2026-09-25 14:20:31",
+    "user_id": 1,
+    "object_type": "proxy-host",
+    "object_id": 1,
+    "action": "disabled",
+    "meta": {
+      "id": 1,
+      "created_on": "2026-09-25 14:20:16",
+      "modified_on": "2026-09-25 14:20:16",
+      "owner_user_id": 1,
+      "domain_names": [
+        "app.test.local"
+      ],
+      "forward_host": "10.0.0.5",
+      "forward_port": 8080,
+      "access_list_id": 0,
+      "certificate_id": 0,
+      "ssl_forced": false,
+      "caching_enabled": false,
+      "block_exploits": true,
+      "advanced_config": "",
+      "meta": {
+        "nginx_online": true,
+        "nginx_err": null
+      },
+      "allow_websocket_upgrade": false,
+      "http2_support": false,
+      "forward_scheme": "http",
+      "enabled": 0,
+      "locations": [
+        {
+          "path": "/api",
+          "forward_scheme": "http",
+          "forward_host": "10.0.0.6",
+          "forward_port": 9000
+        }
+      ],
+      "hsts_enabled": false,
+      "hsts_subdomains": false,
+      "trust_forwarded_proto": false
+    },
+    "user": {
+      "id": 1,
+      "created_on": "2026-09-25 14:19:45",
+      "modified_on": "2026-09-25 14:19:45",
+      "is_deleted": false,
+      "is_disabled": false,
+      "email": "admin@test.local",
+      "name": "Administrator",
+      "nickname": "Admin",
+      "avatar": "",
+      "roles": [
+        "admin"
+      ]
+    }
+  },
+  {
+    "id": 5,
+    "created_on": "2026-09-25 14:20:30",
+    "modified_on": "2026-09-25 14:20:30",
+    "user_id": 1,
+    "object_type": "stream",
+    "object_id": 1,
+    "action": "created",
+    "meta": {
+      "incoming_port": 2222,
+      "forwarding_host": "10.0.0.7",
+      "forwarding_port": 22,
+      "tcp_forwarding": true,
+      "udp_forwarding": false,
+      "owner_user_id": 1,
+      "meta": {}
+    },
+    "user": {
+      "id": 1,
+      "created_on": "2026-09-25 14:19:45",
+      "modified_on": "2026-09-25 14:19:45",
+      "is_deleted": false,
+      "is_disabled": false,
+      "email": "admin@test.local",
+      "name": "Administrator",
+      "nickname": "Admin",
+      "avatar": "",
+      "roles": [
+        "admin"
+      ]
+    }
+  },
+  {
+    "id": 4,
+    "created_on": "2026-09-25 14:20:30",
+    "modified_on": "2026-09-25 14:20:30",
+    "user_id": 1,
+    "object_type": "dead-host",
+    "object_id": 1,
+    "action": "created",
+    "meta": {
+      "domain_names": [
+        "gone.test.local"
+      ],
+      "owner_user_id": 1,
+      "ssl_forced": false,
+      "http2_support": false,
+      "hsts_enabled": false,
+      "hsts_subdomains": false,
+      "advanced_config": ""
+    },
+    "user": {
+      "id": 1,
+      "created_on": "2026-09-25 14:19:45",
+      "modified_on": "2026-09-25 14:19:45",
+      "is_deleted": false,
+      "is_disabled": false,
+      "email": "admin@test.local",
+      "name": "Administrator",
+      "nickname": "Admin",
+      "avatar": "",
+      "roles": [
+        "admin"
+      ]
+    }
+  },
+  {
+    "id": 3,
+    "created_on": "2026-09-25 14:20:30",
+    "modified_on": "2026-09-25 14:20:30",
+    "user_id": 1,
+    "object_type": "redirection-host",
+    "object_id": 1,
+    "action": "created",
+    "meta": {
+      "domain_names": [
+        "old.test.local"
+      ],
+      "forward_http_code": 301,
+      "forward_scheme": "auto",
+      "forward_domain_name": "new.test.local",
+      "preserve_path": true,
+      "owner_user_id": 1,
+      "ssl_forced": false,
+      "http2_support": false,
+      "hsts_enabled": false,
+      "hsts_subdomains": false,
+      "meta": {}
+    },
+    "user": {
+      "id": 1,
+      "created_on": "2026-09-25 14:19:45",
+      "modified_on": "2026-09-25 14:19:45",
+      "is_deleted": false,
+      "is_disabled": false,
+      "email": "admin@test.local",
+      "name": "Administrator",
+      "nickname": "Admin",
+      "avatar": "",
+      "roles": [
+        "admin"
+      ]
+    }
+  },
+  {
+    "id": 2,
+    "created_on": "2026-09-25 14:20:30",
+    "modified_on": "2026-09-25 14:20:30",
+    "user_id": 1,
+    "object_type": "access-list",
+    "object_id": 1,
+    "action": "created",
+    "meta": {
+      "name": "Office",
+      "satisfy_any": true,
+      "pass_auth": false,
+      "items": [
+        {
+          "username": "bob",
+          "password": "",
+          "hint": "s******"
+        }
+      ],
+      "clients": [
+        {
+          "address": "10.0.0.0/8",
+          "directive": "allow"
+        }
+      ],
+      "id": 1,
+      "meta": {}
+    },
+    "user": {
+      "id": 1,
+      "created_on": "2026-09-25 14:19:45",
+      "modified_on": "2026-09-25 14:19:45",
+      "is_deleted": false,
+      "is_disabled": false,
+      "email": "admin@test.local",
+      "name": "Administrator",
+      "nickname": "Admin",
+      "avatar": "",
+      "roles": [
+        "admin"
+      ]
+    }
+  },
+  {
+    "id": 1,
+    "created_on": "2026-09-25 14:20:16",
+    "modified_on": "2026-09-25 14:20:16",
+    "user_id": 1,
+    "object_type": "proxy-host",
+    "object_id": 1,
+    "action": "created",
+    "meta": {
+      "domain_names": [
+        "app.test.local"
+      ],
+      "forward_scheme": "http",
+      "forward_host": "10.0.0.5",
+      "forward_port": 8080,
+      "block_exploits": true,
+      "locations": [
+        {
+          "path": "/api",
+          "forward_scheme": "http",
+          "forward_host": "10.0.0.6",
+          "forward_port": 9000
+        }
+      ],
+      "owner_user_id": 1,
+      "ssl_forced": false,
+      "http2_support": false,
+      "hsts_enabled": false,
+      "hsts_subdomains": false,
+      "advanced_config": "",
+      "meta": {}
+    },
+    "user": {
+      "id": 1,
+      "created_on": "2026-09-25 14:19:45",
+      "modified_on": "2026-09-25 14:19:45",
+      "is_deleted": false,
+      "is_disabled": false,
+      "email": "admin@test.local",
+      "name": "Administrator",
+      "nickname": "Admin",
+      "avatar": "",
+      "roles": [
+        "admin"
+      ]
+    }
+  }
+]

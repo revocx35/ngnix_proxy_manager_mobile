@@ -1,0 +1,33 @@
+[
+    {
+        "id": 1,
+        "created_on": "2026-09-25 14:20:30",
+        "modified_on": "2026-09-25 14:20:30",
+        "owner_user_id": 1,
+        "incoming_port": 2222,
+        "forwarding_host": "10.0.0.7",
+        "forwarding_port": 22,
+        "tcp_forwarding": true,
+        "udp_forwarding": false,
+        "meta": {
+            "nginx_online": true,
+            "nginx_err": null
+        },
+        "enabled": true,
+        "certificate_id": 0,
+        "owner": {
+            "id": 1,
+            "created_on": "2026-09-25 14:19:45",
+            "modified_on": "2026-09-25 14:19:45",
+            "is_disabled": false,
+            "email": "admin@test.local",
+            "name": "Administrator",
+            "nickname": "Admin",
+            "avatar": "",
+            "roles": [
+                "admin"
+            ]
+        },
+        "certificate": null
+    }
+]

@@ -1,0 +1,76 @@
+[
+  {
+    "id": 1,
+    "created_on": "2026-09-25 14:20:16",
+    "modified_on": "2026-09-25 14:27:46",
+    "owner_user_id": 1,
+    "domain_names": [
+      "app.test.local"
+    ],
+    "forward_host": "10.0.0.5",
+    "forward_port": 8080,
+    "access_list_id": 1,
+    "certificate_id": 1,
+    "ssl_forced": true,
+    "caching_enabled": false,
+    "block_exploits": true,
+    "advanced_config": "",
+    "meta": {
+      "nginx_online": true,
+      "nginx_err": null
+    },
+    "allow_websocket_upgrade": false,
+    "http2_support": true,
+    "forward_scheme": "http",
+    "enabled": true,
+    "locations": [
+      {
+        "path": "/api",
+        "forward_scheme": "http",
+        "forward_host": "10.0.0.6",
+        "forward_port": 9000
+      }
+    ],
+    "hsts_enabled": false,
+    "hsts_subdomains": false,
+    "trust_forwarded_proto": false,
+    "owner": {
+      "id": 1,
+      "created_on": "2026-09-25 14:19:45",
+      "modified_on": "2026-09-25 14:19:45",
+      "is_disabled": false,
+      "email": "admin@test.local",
+      "name": "Administrator",
+      "nickname": "Admin",
+      "avatar": "",
+      "roles": [
+        "admin"
+      ]
+    },
+    "access_list": {
+      "id": 1,
+      "created_on": "2026-09-25 14:20:30",
+      "modified_on": "2026-09-25 14:20:30",
+      "owner_user_id": 1,
+      "is_deleted": false,
+      "name": "Office",
+      "meta": {},
+      "satisfy_any": true,
+      "pass_auth": false
+    },
+    "certificate": {
+      "id": 1,
+      "created_on": "2026-09-25 14:20:31",
+      "modified_on": "2026-09-25 14:21:41",
+      "owner_user_id": 1,
+      "is_deleted": false,
+      "provider": "other",
+      "nice_name": "My custom",
+      "domain_names": [
+        "custom.test.local"
+      ],
+      "expires_on": "2026-12-24 14:21:40",
+      "meta": {}
+    }
+  }
+]

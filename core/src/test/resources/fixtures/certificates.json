@@ -1,0 +1,31 @@
+[
+  {
+    "id": 1,
+    "created_on": "2026-09-25 14:20:31",
+    "modified_on": "2026-09-25 14:21:41",
+    "owner_user_id": 1,
+    "provider": "other",
+    "nice_name": "My custom",
+    "domain_names": [
+      "custom.test.local"
+    ],
+    "expires_on": "2026-12-24 14:21:40",
+    "meta": {
+      "certificate": "-----BEGIN (redacted in fixture)-----",
+      "certificate_key": "-----BEGIN (redacted in fixture)-----"
+    },
+    "owner": {
+      "id": 1,
+      "created_on": "2026-09-25 14:19:45",
+      "modified_on": "2026-09-25 14:19:45",
+      "is_disabled": false,
+      "email": "admin@test.local",
+      "name": "Administrator",
+      "nickname": "Admin",
+      "avatar": "",
+      "roles": [
+        "admin"
+      ]
+    }
+  }
+]

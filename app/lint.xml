@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lint>
+    <!-- Intentional: NPM's admin UI is commonly plain http://<lan-ip>:81, and some people run it behind a
+         private CA. The sign-in screen warns before using HTTP to a public address (see ARCHITECTURE.md). -->
+    <issue id="InsecureBaseConfiguration" severity="ignore" />
+    <issue id="AcceptsUserCertificates" severity="ignore" />
+    <!-- Ignored below API 33, where the app falls back to the regular back handling. -->
+    <issue id="UnusedAttribute" severity="ignore" />
+    <!-- AAPT doesn't resolve the adaptive icon from plain mipmap-anydpi here; keep the -v26 folder. -->
+    <issue id="ObsoleteSdkInt">
+        <ignore path="src/main/res/mipmap-anydpi-v26" />
+    </issue>
+</lint>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  NPM's admin UI is very often reached as plain http://<lan-ip>:81 inside a home network, so cleartext is
+  allowed here; the sign-in screen warns and asks for confirmation before using HTTP to a public address.
+  User-installed CAs are trusted as well, so an admin UI behind a private CA works once that CA is installed.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true">
+        <trust-anchors>
+            <certificates src="system" />
+            <certificates src="user" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>

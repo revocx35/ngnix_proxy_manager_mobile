@@ -1,0 +1,9 @@
+[
+    {
+        "id": "default-site",
+        "name": "Default Site",
+        "description": "What to show when Nginx is hit with an unknown Host",
+        "value": "congratulations",
+        "meta": {}
+    }
+]

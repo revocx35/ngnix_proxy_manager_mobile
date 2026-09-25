@@ -1,0 +1,50 @@
+[
+    {
+        "id": 1,
+        "created_on": "2026-09-25 14:20:30",
+        "modified_on": "2026-09-25 14:20:30",
+        "owner_user_id": 1,
+        "name": "Office",
+        "meta": {},
+        "satisfy_any": true,
+        "pass_auth": false,
+        "proxy_host_count": 1,
+        "owner": {
+            "id": 1,
+            "created_on": "2026-09-25 14:19:45",
+            "modified_on": "2026-09-25 14:19:45",
+            "is_deleted": false,
+            "is_disabled": false,
+            "email": "admin@test.local",
+            "name": "Administrator",
+            "nickname": "Admin",
+            "avatar": "",
+            "roles": [
+                "admin"
+            ]
+        },
+        "items": [
+            {
+                "id": 1,
+                "created_on": "2026-09-25 14:20:30",
+                "modified_on": "2026-09-25 14:20:30",
+                "access_list_id": 1,
+                "username": "bob",
+                "password": "",
+                "meta": {},
+                "hint": "s******"
+            }
+        ],
+        "clients": [
+            {
+                "id": 1,
+                "created_on": "2026-09-25 14:20:30",
+                "modified_on": "2026-09-25 14:20:30",
+                "access_list_id": 1,
+                "address": "10.0.0.0/8",
+                "directive": "allow",
+                "meta": {}
+            }
+        ]
+    }
+]
