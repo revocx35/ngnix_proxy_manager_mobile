@@ -11,7 +11,8 @@ AutoName: NPM Mobile
 
 RepoType: git
 Repo: https://github.com/revocx35/ngnix_proxy_manager_mobile.git
-Binaries: https://github.com/revocx35/ngnix_proxy_manager_mobile/releases/download/v%v/npm-mobile-%v.apk
+Binaries:
+  https://github.com/revocx35/ngnix_proxy_manager_mobile/releases/download/v%v/npm-mobile-%v.apk
 
 Builds:
   - versionName: 1.0.1
