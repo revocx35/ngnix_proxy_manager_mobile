@@ -1,0 +1,18 @@
+NPM Mobile manages your <a href="https://nginxproxymanager.com">Nginx Proxy Manager</a> (NPM) server from your phone. It is a native app, not a web wrapper: it talks directly to your server's API, with no cloud service in between and no tracking.
+
+<b>Features</b>
+<ul>
+<li><b>Dashboard:</b> host counts, NPM update notice, and a list of problems (hosts whose nginx config failed, certificates expiring soon)</li>
+<li><b>Proxy hosts:</b> create, edit, enable/disable and delete; domains, forward scheme/host/port, caching, exploit blocking, websockets, access lists, custom locations, SSL (force SSL, HTTP/2, HSTS) and custom nginx configuration</li>
+<li><b>Redirection hosts, streams (TCP/UDP) and 404 hosts</b></li>
+<li><b>SSL certificates:</b> request Let's Encrypt certificates (HTTP or DNS challenge with any provider NPM supports), test domain reachability, renew, download, delete, and upload custom certificates with validation</li>
+<li><b>Access lists:</b> basic-auth users and allow/deny IP rules</li>
+<li><b>Users (admins):</b> accounts, roles, per-section permissions and passwords</li>
+<li><b>Audit log</b> and the <b>default site</b> setting</li>
+<li><b>Your account:</b> profile, password, and two-factor authentication (QR code setup, backup codes); 2FA sign-in is supported</li>
+<li>Several NPM servers, automatic session renewal, light/dark theme and Material You colors</li>
+</ul>
+
+Session tokens are stored encrypted with a key from the Android Keystore. Plain HTTP is allowed for LAN addresses (NPM's admin UI usually runs on port 81); for HTTP to a public address the app warns you first.
+
+Tested with Nginx Proxy Manager 2.15. This is an unofficial app, not affiliated with the Nginx Proxy Manager project.

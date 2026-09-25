@@ -1,0 +1,3 @@
+* First F-Droid release
+* Dashboard, proxy/redirection/stream/404 hosts, SSL certificates (Let's Encrypt and custom), access lists, users, audit log, default site
+* Two-factor authentication, several servers, light/dark theme
