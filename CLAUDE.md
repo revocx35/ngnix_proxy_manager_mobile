@@ -34,7 +34,10 @@ the design source of truth, including the NPM API quirks the code depends on (§
   build can pass because of untracked files).
 
 ## Releasing
-Bump `versionCode`/`versionName` in `app/build.gradle.kts`, commit, then `git tag vX.Y.Z && git push --tags`. The
+Bump `versionCode`/`versionName` in `app/build.gradle.kts`, add `fastlane/metadata/android/en-US/changelogs/<versionCode>.txt`,
+commit, then `git tag vX.Y.Z && git push --tags`. F-Droid picks the tag up automatically and ships our signed APK
+only if its own build is byte-identical: keep the build reproducible (see `docs/FDROID.md`, and verify before
+tagging when build config changes). The
 `release` CI job signs with the `RELEASE_*` repository secrets and creates the GitHub release with the APK. The
 signing keystore lives outside the repo; its location is in Claude's project memory. Never commit it or
 `keystore.properties`. Losing it means users must uninstall to update.

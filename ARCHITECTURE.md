@@ -165,3 +165,5 @@ the NPM Docker image and runs the live tests too.
 - Release: bump `versionCode`/`versionName` in `app/build.gradle.kts`, commit, tag `vX.Y.Z`, push the tag. CI
   builds the signed APK with the `RELEASE_*` repository secrets and publishes a GitHub release. Local signed builds
   read `keystore.properties` (never committed).
+- F-Droid: reproducible build from the tag, publishing our signed APK; store texts in `fastlane/`. Details and the
+  local verification procedure: `docs/FDROID.md`.
