@@ -32,6 +32,14 @@ class SupportTest {
             .forEach { assertFalse(it, ServerAddress.isLocalHost(it)) }
     }
 
+    @Test fun lanAddressesForAndroid17Permission() {
+        listOf("192.168.1.10", "10.0.2.2", "172.20.1.1", "169.254.1.1", "fd12::1", "nas.local", "router.lan")
+            .forEach { assertTrue(it, ServerAddress.resolvesToLan(it)) }
+        // Loopback, public and CGNAT (Tailscale, via VPN) addresses don't need the local network permission.
+        listOf("127.0.0.1", "8.8.8.8", "100.101.102.103", "2001:db8::1")
+            .forEach { assertFalse(it, ServerAddress.resolvesToLan(it)) }
+    }
+
     @Test fun domains() {
         assertEquals(listOf("a.com", "b.com", "*.c.com"), Validation.splitDomains("A.com, b.com\n*.c.com a.com"))
         assertNull(Validation.domainError("*.example.com"))

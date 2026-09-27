@@ -289,7 +289,7 @@ fun HostCard(host: NpmHost, busy: Boolean, canManage: Boolean, onClick: () -> Un
                     if (host.status == HostStatus.Disabled) add(Triple("Disabled", status.disabled, AppIcons.Power))
                     if (host.certificateId > 0) add(Triple(if ((host as? ProxyHost)?.sslForced == true || (host as? RedirectionHost)?.sslForced == true || (host as? DeadHost)?.sslForced == true) "HTTPS only" else "SSL", status.online, AppIcons.Lock))
                     (host as? ProxyHost)?.accessList?.let { add(Triple(it.name, MaterialTheme.colorScheme.tertiary, AppIcons.AccessList)) }
-                    if ((host as? ProxyHost)?.locations?.isNotEmpty() == true) add(Triple("${host.locations.size} locations", MaterialTheme.colorScheme.secondary, AppIcons.Route))
+                    if ((host as? ProxyHost)?.locations?.isNotEmpty() == true) add(Triple(io.github.revocx35.npmmobile.ui.Format.plural(host.locations.size, "location"), MaterialTheme.colorScheme.secondary, AppIcons.Route))
                 }
                 if (tags.isNotEmpty()) {
                     Row(Modifier.padding(top = 6.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {

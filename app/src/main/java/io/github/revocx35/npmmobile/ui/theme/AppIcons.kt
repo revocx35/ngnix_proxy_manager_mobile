@@ -78,6 +78,7 @@ object AppIcons {
     val Swap: ImageVector by lazy { icon("swap_horiz", "M280-160 80-360l200-200 56 57-103 103h287v80H233l103 103-56 57Zm400-240-56-57 103-103H440v-80h287L624-743l56-57 200 200-200 200Z") }
     val ChevronRight: ImageVector by lazy { icon("chevron_right", "M504-480 320-664l56-56 240 240-240 240-56-56 184-184Z") }
     val Home: ImageVector by lazy { icon("home", "M240-200h120v-240h240v240h120v-360L480-740 240-560v360Zm-80 80v-480l320-240 320 240v480H520v-240h-80v240H160Zm320-350Z") }
+    val Lan: ImageVector by lazy { icon("lan", "M120-80v-280h120v-160h200v-80H320v-280h320v280H520v80h200v160h120v280H520v-280h120v-80H320v80h120v280H120Zm280-600h160v-120H400v120ZM200-160h160v-120H200v120Zm400 0h160v-120H600v120ZM480-680ZM360-280Zm240 0Z") }
 
     private fun icon(name: String, pathData: String): ImageVector =
         ImageVector.Builder(name, 24.dp, 24.dp, viewportWidth = 960f, viewportHeight = 960f)

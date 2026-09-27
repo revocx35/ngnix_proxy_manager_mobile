@@ -1,5 +1,6 @@
 package io.github.revocx35.npmmobile.ui
 
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
@@ -70,8 +71,16 @@ fun MainShell(session: SessionState.SignedIn) {
     }
     val onTopLevel = destination != null && tabs.any { t -> destination.hierarchy.any(t.matches) }
 
+    val graph = LocalGraph.current
     CompositionLocalProvider(LocalSession provides session) {
+        LocalNetworkPermissionPrompt(session.account.address) {
+            graph.session.validate()
+            graph.repository.retryFailed()
+        }
+        // Only the bottom navigation is laid out here; every screen's own Scaffold handles the system bars
+        // (status bar on top, navigation bar when the bottom bar is hidden).
         Scaffold(
+            contentWindowInsets = WindowInsets(0, 0, 0, 0),
             bottomBar = {
                 if (onTopLevel) {
                     NavigationBar {
@@ -92,7 +101,7 @@ fun MainShell(session: SessionState.SignedIn) {
             NavHost(
                 navController = nav,
                 startDestination = DashboardRoute,
-                modifier = Modifier.padding(bottom = padding.calculateBottomPadding()).consumeWindowInsets(padding),
+                modifier = Modifier.padding(padding).consumeWindowInsets(padding),
             ) {
                 composable<DashboardRoute> { DashboardScreen(nav) }
                 composable<HostsRoute> { HostsScreen(nav, it.toRoute<HostsRoute>().tab) }

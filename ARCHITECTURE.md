@@ -147,21 +147,29 @@ NPM in Docker (`LiveNpmTest`). The app depends on `core` and adds storage, sessi
 | `app` `AppUiTest` | Robolectric + Compose UI against `FakeNpmServer`: sign-in, wrong password, 2FA, expired token, create/disable host, form validation. |
 | `app` `LiveAppFlowTest` | The real UI against a real NPM (`NPM_IT_*`). |
 | `app` `ScreenshotTest` | Renders the screens (light, dark, tablet) with `Demo` data to `app/build/screenshots` (Roborazzi record mode). |
+| `scripts/e2e-release.py` | The signed, R8-minified release APK on an API 37 emulator (`scripts/emulator.sh`), driven through UI Automator: sign-in incl. the local network permission prompt, every screen, create/disable/delete a host (checked via the NPM API), app restart with the Keystore-stored session. Compose test tags are exposed as resource ids (`testTagsAsResourceId`). |
 
-There is no emulator in the dev environment (no KVM), so UI is verified with Robolectric screenshots. CI starts
-the NPM Docker image and runs the live tests too.
+CI starts the NPM Docker image and runs the unit and live tests. The emulator e2e run is done locally before
+each release (it needs KVM).
 
 ## 7. Security notes
 - Tokens/passwords: Keystore-encrypted; app backups and device transfer are disabled.
 - Cleartext HTTP is allowed (NPM's admin UI is typically `http://<lan-ip>:81`), but the sign-in screen requires
   explicit confirmation for HTTP to a non-local address. User-installed CAs are trusted so private-CA setups work.
 - The app never logs tokens, passwords or DNS credentials; the audit-log viewer redacts `dns_provider_credentials`.
-- Release builds: R8 is off until minified builds are verified on a device (reflection in navigation/serialization).
+- Release builds: R8 shrinking/optimization without obfuscation (`app/proguard-rules.pro`); libraries ship their own
+  keep rules. Verified per release with `scripts/e2e-release.py`.
+- Android 17 local network protection: connections to LAN addresses (RFC 1918, link-local, ULA, `*.local`/`.lan`)
+  need the `ACCESS_LOCAL_NETWORK` runtime permission, otherwise they silently time out. `ui/LocalNetworkAccess.kt`
+  requests it before signing in to such a server (`ServerAddress.resolvesToLan`, DNS resolved off the main thread),
+  offers it after a network failure, and prompts in `MainShell` if it's missing for the signed-in server.
 
 ## 8. Build, test, release
 - `./gradlew :core:test :app:testDebugUnitTest :app:lintDebug :app:assembleDebug` (= CI).
 - Live tests: `scripts/dev-npm.sh up`, export the printed `NPM_IT_*` vars, rerun the tests.
 - Screenshots: `./gradlew :app:recordRoborazziDebug --tests '*ScreenshotTest*'` → `app/build/screenshots/`.
+- Release check on the emulator: `scripts/emulator.sh start`, `./gradlew :app:assembleRelease`,
+  `python3 scripts/e2e-release.py` → `build/e2e/`.
 - Release: bump `versionCode`/`versionName` in `app/build.gradle.kts`, commit, tag `vX.Y.Z`, push the tag. CI
   builds the signed APK with the `RELEASE_*` repository secrets and publishes a GitHub release. Local signed builds
   read `keystore.properties` (never committed).

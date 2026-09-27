@@ -22,8 +22,8 @@ android {
         applicationId = "io.github.revocx35.npmmobile"
         minSdk = 26
         targetSdk = 37
-        versionCode = 2
-        versionName = "1.0.1"
+        versionCode = 3
+        versionName = "1.0.2"
     }
 
     signingConfigs {
@@ -39,10 +39,10 @@ android {
 
     buildTypes {
         release {
-            // R8 stays off until minified builds are checked on a real device: navigation routes and
-            // kotlinx.serialization use reflection-like lookups that differ in minified code.
-            isMinifyEnabled = false
-            isShrinkResources = false
+            // R8 shrinks and optimizes (no renaming, see proguard-rules.pro). Release builds are checked on the
+            // emulator with scripts/e2e-release.py before tagging: minified code can fail where tests pass.
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
             signingConfig = signingConfigs.findByName("release")
         }

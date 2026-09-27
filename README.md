@@ -49,6 +49,8 @@ Tested against **Nginx Proxy Manager 2.15.1**. Other 2.x versions with the same 
 
 - Session tokens (and, only if you enable "stay signed in", your password) are encrypted with a key from the
   Android Keystore that never leaves the device. App backups are disabled.
+- On Android 17+, the app asks for the "Nearby devices" (local network) permission when your NPM server is on your
+  home network: Android blocks connections to LAN addresses without it.
 - Plain HTTP is allowed for LAN addresses (NPM's admin UI usually runs on `http://…:81`). For HTTP to a public
   address the app warns you and asks for confirmation first.
 - Certificates from user-installed CAs are trusted, so an admin UI behind a private CA works once the CA is

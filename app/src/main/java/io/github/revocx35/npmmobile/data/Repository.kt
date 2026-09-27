@@ -112,6 +112,9 @@ class Repository(private val session: SessionManager, private val scope: Corouti
 
     fun clearAll() = all.forEach { it.clear() }
 
+    /** Reloads every collection whose last load failed (e.g. after network access was granted). */
+    fun retryFailed() = all.filter { it.state.value.error != null }.forEach { it.refresh() }
+
     fun hosts(kind: HostKind): Cached<out List<*>> = when (kind) {
         HostKind.Proxy -> proxyHosts
         HostKind.Redirection -> redirectionHosts

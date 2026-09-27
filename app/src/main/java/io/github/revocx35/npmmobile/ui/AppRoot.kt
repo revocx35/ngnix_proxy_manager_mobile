@@ -15,6 +15,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.revocx35.npmmobile.data.AppGraph
@@ -34,7 +36,8 @@ fun AppRoot(graph: AppGraph) {
                 graph.session.validateIfStale()
                 onPauseOrDispose { }
             }
-            Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.surface) {
+            // Test tags double as resource ids so UI Automator (scripts/e2e-release.py) can drive release builds.
+            Surface(Modifier.fillMaxSize().semantics { testTagsAsResourceId = true }, color = MaterialTheme.colorScheme.surface) {
                 when (val s = state) {
                     SessionState.Starting -> Box(Modifier.fillMaxSize())
                     SessionState.NoAccount -> LoginScreen(

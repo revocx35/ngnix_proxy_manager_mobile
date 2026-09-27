@@ -23,7 +23,7 @@ ICONS = {
     'AccountCircle': 'account_circle', 'PersonAdd': 'person_add', 'Mail': 'mail', 'Link': 'link',
     'Update': 'update', 'Sync': 'sync', 'Server': 'host', 'Shield': 'shield', 'Help': 'help', 'Pending': 'pending',
     'Web': 'web', 'Tune': 'tune', 'Filter': 'filter_list', 'Admin': 'admin_panel_settings', 'Swap': 'swap_horiz',
-    'ChevronRight': 'chevron_right', 'Home': 'home',
+    'ChevronRight': 'chevron_right', 'Home': 'home', 'Lan': 'lan',
 }
 
 URL = 'https://fonts.gstatic.com/s/i/short-term/release/materialsymbolsoutlined/{}/default/24px.svg'

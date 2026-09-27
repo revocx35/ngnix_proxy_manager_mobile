@@ -2,6 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Android 17+: needed to reach an NPM admin UI on the local network (192.168.x.x, 10.x, *.local…).
+         Runtime permission; the app asks for it only when the server address is local. -->
+    <uses-permission android:name="android.permission.ACCESS_LOCAL_NETWORK" />
 
     <!-- No backups: the app holds encrypted session tokens whose Keystore key can't be restored anyway. -->
     <application

@@ -23,6 +23,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -46,6 +47,7 @@ import io.github.revocx35.npmmobile.core.Validation
 import io.github.revocx35.npmmobile.data.Account
 import io.github.revocx35.npmmobile.data.SessionManager
 import io.github.revocx35.npmmobile.ui.LocalGraph
+import io.github.revocx35.npmmobile.ui.LocalNetworkAccess
 import io.github.revocx35.npmmobile.ui.UiError
 import io.github.revocx35.npmmobile.ui.components.ErrorCard
 import io.github.revocx35.npmmobile.ui.components.FormTextField
@@ -57,7 +59,14 @@ import io.github.revocx35.npmmobile.ui.toUiError
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
-class LoginViewModel(private val session: SessionManager, prefill: Account?) : ViewModel() {
+class LoginViewModel(
+    private val session: SessionManager,
+    prefill: Account?,
+    /** True if Android 17's local network permission must be granted before connecting to this address. */
+    private val needsLocalNetwork: suspend (ServerAddress) -> Boolean = { false },
+    /** True while the permission is enforced (Android 17+) and not granted. */
+    private val localNetworkMissing: () -> Boolean = { false },
+) : ViewModel() {
     var server by mutableStateOf(prefill?.server ?: "")
     var email by mutableStateOf(prefill?.email ?: "")
     var password by mutableStateOf("")
@@ -73,6 +82,14 @@ class LoginViewModel(private val session: SessionManager, prefill: Account?) : V
     var health by mutableStateOf<HealthStatus?>(null)
         private set
     var showErrors by mutableStateOf(false)
+        private set
+    /** The screen should ask for the local network permission now (then call [onLocalNetworkResult]). */
+    var askLocalNetwork by mutableStateOf(false)
+        private set
+    /** A connection failed while the permission is missing: offer it (servers not recognized as local). */
+    var offerLocalNetwork by mutableStateOf(false)
+        private set
+    var localNetworkDenied by mutableStateOf(false)
         private set
 
     private var job: Job? = null
@@ -98,9 +115,14 @@ class LoginViewModel(private val session: SessionManager, prefill: Account?) : V
         }
         val addr = address ?: return
         error = null
+        offerLocalNetwork = false
         job = viewModelScope.launch {
             try {
                 busy = "Checking server…"
+                if (needsLocalNetwork(addr)) {
+                    askLocalNetwork = true
+                    return@launch
+                }
                 val c = session.newClient(addr)
                 client = c
                 val h = c.health()
@@ -117,10 +139,18 @@ class LoginViewModel(private val session: SessionManager, prefill: Account?) : V
             } catch (e: Exception) {
                 if (e is kotlinx.coroutines.CancellationException) throw e
                 error = e.toUiError()
+                if (e is NpmException.Network && localNetworkMissing()) offerLocalNetwork = true
             } finally {
                 busy = null
             }
         }
+    }
+
+    fun onLocalNetworkResult(granted: Boolean) {
+        askLocalNetwork = false
+        offerLocalNetwork = false
+        localNetworkDenied = !granted
+        if (granted) submit() else error = UiError(LocalNetworkAccess.DENIED_MESSAGE)
     }
 
     private fun submitCode() {
@@ -163,8 +193,19 @@ class LoginViewModel(private val session: SessionManager, prefill: Account?) : V
 @Composable
 fun LoginScreen(prefill: Account?, reason: String?, onCancel: (() -> Unit)?) {
     val graph = LocalGraph.current
-    val vm: LoginViewModel = viewModel(key = "login-${prefill?.id}") { LoginViewModel(graph.session, prefill) }
+    val context = androidx.compose.ui.platform.LocalContext.current.applicationContext
+    val vm: LoginViewModel = viewModel(key = "login-${prefill?.id}") {
+        LoginViewModel(
+            graph.session, prefill,
+            needsLocalNetwork = { LocalNetworkAccess.needed(context, it) },
+            localNetworkMissing = { !LocalNetworkAccess.granted(context) },
+        )
+    }
     val focus = androidx.compose.ui.platform.LocalFocusManager.current
+    val localNetworkLauncher = androidx.activity.compose.rememberLauncherForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.RequestPermission(),
+    ) { vm.onLocalNetworkResult(it) }
+    LaunchedEffect(vm.askLocalNetwork) { if (vm.askLocalNetwork) localNetworkLauncher.launch(LocalNetworkAccess.PERMISSION) }
 
     Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.surface) {
         Box(Modifier.fillMaxSize().systemBarsPadding().imePadding(), contentAlignment = Alignment.TopCenter) {
@@ -200,6 +241,17 @@ fun LoginScreen(prefill: Account?, reason: String?, onCancel: (() -> Unit)?) {
                 Spacer(Modifier.height(8.dp))
                 if (reason != null && vm.error == null && vm.challenge == null) InfoBanner(reason, icon = AppIcons.Schedule)
                 vm.error?.let { ErrorCard(it.message, details = it.details) }
+                if (vm.offerLocalNetwork) {
+                    io.github.revocx35.npmmobile.ui.components.TonalButton(
+                        "Allow local network access", { localNetworkLauncher.launch(LocalNetworkAccess.PERMISSION) },
+                        Modifier.fillMaxWidth(), icon = AppIcons.Lan,
+                    )
+                }
+                if (vm.localNetworkDenied) {
+                    TextButton(onClick = { LocalNetworkAccess.openAppSettings(context) }, modifier = Modifier.align(Alignment.CenterHorizontally)) {
+                        Text("Open app settings")
+                    }
+                }
 
                 if (vm.challenge == null) {
                     FormTextField(

@@ -1,0 +1,3 @@
+* Much smaller download (2 MB instead of 10 MB): the app is now optimized with R8
+* Android 17: asks for local network access, which Android now requires to reach an NPM server on your home network
+* Fixed screen titles overlapping the status bar

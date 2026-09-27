@@ -56,9 +56,27 @@ data class ServerAddress(val baseUrl: HttpUrl) {
             if (!isV6Literal && !Validation.isIpv4(h)) return false
             // Only literal IP addresses reach this point, so no DNS lookup happens here.
             val addr = runCatching { InetAddress.getByName(h) }.getOrNull() ?: return false
-            return addr.isLoopbackAddress || addr.isSiteLocalAddress || addr.isLinkLocalAddress ||
-                (addr.address.size == 16 && (addr.address[0].toInt() and 0xfe) == 0xfc) || // IPv6 ULA fc00::/7
+            return addr.isLoopbackAddress || isLanAddress(addr) ||
                 (addr.address.size == 4 && addr.address[0].toInt() and 0xff == 100 && (addr.address[1].toInt() and 0xc0) == 64) // CGNAT/Tailscale 100.64/10
+        }
+
+        /**
+         * Private LAN address (RFC 1918, link-local, IPv6 ULA fc00::/7). Android 17+ only lets an app connect to
+         * these with the ACCESS_LOCAL_NETWORK runtime permission.
+         */
+        fun isLanAddress(addr: InetAddress): Boolean =
+            addr.isSiteLocalAddress || addr.isLinkLocalAddress ||
+                (addr.address.size == 16 && (addr.address[0].toInt() and 0xfe) == 0xfc)
+
+        /**
+         * True if [host] is (or resolves to) a LAN address or uses a local-only name (`.local`, `.lan`, …).
+         * May do a DNS lookup: call it off the main thread.
+         */
+        fun resolvesToLan(host: String): Boolean {
+            val h = host.lowercase().trim('[', ']')
+            if (h.endsWith(".local") || h.endsWith(".lan") || h.endsWith(".home.arpa") || h.endsWith(".internal")) return true
+            val addrs = runCatching { InetAddress.getAllByName(h) }.getOrNull() ?: return false
+            return addrs.any { isLanAddress(it) }
         }
     }
 }
