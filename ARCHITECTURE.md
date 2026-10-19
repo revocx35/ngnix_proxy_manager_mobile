@@ -4,7 +4,7 @@ NPM Mobile is a native Android client (Kotlin, Jetpack Compose, Material 3) for
 [Nginx Proxy Manager](https://nginxproxymanager.com) (NPM). It talks directly to NPM's REST API: no WebView, no
 backend of its own, no analytics.
 
-- Target: NPM **2.15.x** (the API is checked against 2.15.1's OpenAPI schema; see §6).
+- Target: NPM **2.15.x and 2.16.x** (requests are checked against both releases' OpenAPI schemas; see §6).
 - Android: minSdk 26, target/compileSdk 37. JDK 21 for Gradle, Kotlin compiled to JVM 17.
 - Toolchain: Gradle 9.8, AGP 9.4 (compiles Kotlin itself), Kotlin 2.4, Compose BOM 2026.09 (Material 3 1.4),
   Navigation 2.10 (type-safe routes), OkHttp 5, kotlinx.serialization 1.11. Versions: `gradle/libs.versions.toml`.
@@ -60,7 +60,7 @@ NPM in Docker (`LiveNpmTest`). The app depends on `core` and adds storage, sessi
 - **Timeouts:** the app's OkHttpClient has a 5-minute read timeout because saving a host with a new Let's Encrypt
   certificate, or a DNS challenge with propagation, blocks the request until certbot finishes.
 
-## 3. NPM API facts the code relies on (verified on 2.15.1)
+## 3. NPM API facts the code relies on (verified on 2.15.1 and 2.16.0)
 
 - `GET /api/` (no auth): `{"status":"OK","setup":true,"version":{…}}`. Used to validate an address before sign-in.
 - `POST /tokens {identity, secret}` → `{token, expires}` **or** `{requires_2fa: true, challenge_token}`; then
@@ -81,6 +81,13 @@ NPM in Docker (`LiveNpmTest`). The app depends on `core` and adds storage, sessi
   `POST /nginx/certificates/{id}/upload` with fields `certificate`, `certificate_key`, `intermediate_certificate`.
   `/validate` takes the same multipart fields. Only Let's Encrypt certificates can be downloaded (zip).
 - Location `forward_host` may contain a path (`10.0.0.5/app`); NPM splits it into host + `forward_path`.
+- NPM 2.16 added per-location access lists (`locations[].access_list_id`). A host save replaces all locations, so
+  a location sent without the key **loses its access list** (the path becomes public). The editor therefore always
+  sends a loaded value back; it leaves the key out when it is 0 because 2.15 rejects it (`additionalProperties:
+  false`). The per-location picker is shown when the account's stored NPM version is ≥ 2.16 or unknown, or when a
+  location already has an access list.
+- NPM 2.16 answers a denied write with 403 (2.15.1: 500) and invalidates tokens issued before a password change.
+  The 2.16 Docker image refuses to start unless `/data` and `/etc/letsencrypt` are mounted.
 - `/test-http` results per domain: `ok`, `no-host`, `failed`, `404`, `wrong-data`, `other:<detail>`.
 - `/audit-log` returns the newest 100 entries (`?query=` filters server side).
 
@@ -140,11 +147,11 @@ NPM in Docker (`LiveNpmTest`). The app depends on `core` and adds storage, sessi
 | Test | What |
 |---|---|
 | `core` `ModelParsingTest` | Parses real NPM 2.15.1 responses (`core/src/test/resources/fixtures`, PEM data redacted). |
-| `core` `SchemaConformanceTest` | Encodes every request class and checks each key/type/enum against NPM's own OpenAPI schema (`npm-2.15.1-schema.json`). Catches fields NPM would reject. |
+| `core` `SchemaConformanceTest` | Encodes every request class and checks each key/type/enum against NPM's own OpenAPI schemas (`npm-2.15.1-schema.json`, `npm-2.16.0-schema.json`). Catches fields NPM would reject. |
 | `core` `NpmClientTest` | MockWebServer: auth header, 2FA, error mapping, multipart, cancellation, and that responses are never read on the calling "UI" thread. |
 | `core` `SupportTest` | Address normalization, local-network detection, validation, permissions. |
 | `core` `LiveNpmTest` | Full round trip against a real NPM (`NPM_IT_*`): every object type, permissions, password, 2FA with a real TOTP. `probeHealthAndSchemaReadOnly` (`NPM_PROBE_URL`) only does unauthenticated GETs. |
-| `app` `AppUiTest` | Robolectric + Compose UI against `FakeNpmServer`: sign-in, wrong password, 2FA, expired token, create/disable host, form validation. |
+| `app` `AppUiTest` | Robolectric + Compose UI against `FakeNpmServer`: sign-in, wrong password, 2FA, expired token, create/disable host, saving keeps location access lists, form validation. |
 | `app` `LiveAppFlowTest` | The real UI against a real NPM (`NPM_IT_*`). |
 | `app` `ScreenshotTest` | Renders the screens (light, dark, tablet) with `Demo` data to `app/build/screenshots` (Roborazzi record mode). |
 | `scripts/e2e-release.py` | The signed, R8-minified release APK on an API 37 emulator (`scripts/emulator.sh`), driven through UI Automator: sign-in incl. the local network permission prompt, every screen, create/disable/delete a host (checked via the NPM API), app restart with the Keystore-stored session. Compose test tags are exposed as resource ids (`testTagsAsResourceId`). |

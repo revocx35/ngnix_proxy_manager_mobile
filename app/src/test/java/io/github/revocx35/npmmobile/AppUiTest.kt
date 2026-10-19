@@ -108,6 +108,21 @@ class AppUiTest {
         assertTrue(npm.requests.contains("POST /nginx/proxy-hosts/${created.id}/disable"))
     }
 
+    @Test fun savingAHostKeepsItsLocationAccessLists() {
+        seed(graph, npm)
+        start()
+        compose.waitForText("Needs attention")
+        compose.onNodeWithTag("tab-Hosts").performClick()
+        compose.onNodeWithTag("hostlist-Proxy").performScrollToNode(hasTestTag("host-3"))
+        compose.onNodeWithTag("host-3").performClick()
+        compose.waitUntil(10_000) { npm.requests.contains("GET /nginx/proxy-hosts/3") }
+        compose.waitForIdle()
+        compose.onNodeWithTag("save").performClick()
+        compose.waitUntil(10_000) { npm.requests.contains("PUT /nginx/proxy-hosts/3") }
+        val locations = npm.hosts().first { it.id == 3 }.locations
+        assertEquals(listOf(0, 2), locations.map { it.accessListId })
+    }
+
     @Test fun invalidFormShowsErrorsAndSendsNothing() {
         seed(graph, npm)
         start()

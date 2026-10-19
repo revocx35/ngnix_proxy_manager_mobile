@@ -124,6 +124,16 @@ class LiveNpmTest {
             assertTrue("nginx config failed: ${proxyFetched.nginxError}", proxyFetched.nginxOnline)
             assertEquals(acl.id, proxyFetched.accessList?.id)
             assertEquals("/api", proxyFetched.locations.single().path)
+            if (npm.health().version?.let { it >= NpmVersion.LOCATION_ACCESS_LISTS } == true) {
+                // NPM 2.16+: a location's own access list survives an update that sends it back (the editor always does).
+                val loc = LocationRequest("/admin", "http", "10.9.9.11", 9001, accessListId = acl.id)
+                val withAcl = npm.updateProxyHost(
+                    proxy.id,
+                    ProxyHostRequest(listOf(domain), "http", "10.9.9.9", 8080, accessListId = acl.id, locations = listOf(loc), advancedConfig = "# $tag"),
+                )
+                assertEquals(acl.id, withAcl.locations.single().accessListId)
+                assertEquals(acl.id, npm.proxyHost(proxy.id).locations.single().accessListId)
+            }
             val updated = npm.updateProxyHost(
                 proxy.id,
                 ProxyHostRequest(listOf(domain, "www.$domain"), "https", "10.9.9.8", 8443, certificateId = CertificateRef.None, cachingEnabled = true),

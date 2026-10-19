@@ -6,7 +6,7 @@
 set -euo pipefail
 
 NAME=npm-test
-VERSION="${NPM_VERSION:-2.15.1}"
+VERSION="${NPM_VERSION:-2.16.0}"
 EMAIL=admin@test.local
 PASSWORD='TestPassw0rd!'
 

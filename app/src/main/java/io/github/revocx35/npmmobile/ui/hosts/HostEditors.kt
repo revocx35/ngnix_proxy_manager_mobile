@@ -31,6 +31,7 @@ import io.github.revocx35.npmmobile.core.DeadHostRequest
 import io.github.revocx35.npmmobile.core.HostKind
 import io.github.revocx35.npmmobile.core.LocationRequest
 import io.github.revocx35.npmmobile.core.NpmClient
+import io.github.revocx35.npmmobile.core.NpmVersion
 import io.github.revocx35.npmmobile.core.ProxyHost
 import io.github.revocx35.npmmobile.core.ProxyHostRequest
 import io.github.revocx35.npmmobile.core.RedirectionHost
@@ -39,6 +40,7 @@ import io.github.revocx35.npmmobile.core.Stream
 import io.github.revocx35.npmmobile.core.StreamRequest
 import io.github.revocx35.npmmobile.core.Validation
 import io.github.revocx35.npmmobile.data.AppGraph
+import io.github.revocx35.npmmobile.data.SessionState
 import io.github.revocx35.npmmobile.ui.LocalGraph
 import io.github.revocx35.npmmobile.ui.components.DomainNamesField
 import io.github.revocx35.npmmobile.ui.components.DropdownField
@@ -74,12 +76,14 @@ class LocationForm(val key: String = UUID.randomUUID().toString()) {
     var host by mutableStateOf("")
     var port by mutableStateOf("80")
     var advanced by mutableStateOf("")
+    /** NPM 2.16+; must be sent back unchanged or NPM removes the location's protection. */
+    var accessListId by mutableIntStateOf(0)
 
     val pathError get() = if (!path.startsWith("/")) "Must start with /" else null
     val hostError get() = Validation.forwardHostError(host, allowPath = true)
     val portError get() = Validation.portError(port.toIntOrNull())
     val valid get() = pathError == null && hostError == null && portError == null
-    fun snapshot() = "$path|$scheme|$host|$port|$advanced"
+    fun snapshot() = "$path|$scheme|$host|$port|$advanced|$accessListId"
 }
 
 class ProxyHostEditorViewModel(graph: AppGraph, id: Int) : HostEditorViewModel<ProxyHost>(graph, HostKind.Proxy, id) {
@@ -117,6 +121,7 @@ class ProxyHostEditorViewModel(graph: AppGraph, id: Int) : HostEditorViewModel<P
                 this.host = l.forwardHost + (l.forwardPath?.takeIf { it.isNotBlank() && it != "/" }.orEmpty())
                 port = l.forwardPort.toString()
                 advanced = l.advancedConfig.orEmpty()
+                accessListId = l.accessListId
             }
         }
         ssl.fill(host.certificateId, host.sslForced, host.http2Support, host.hstsEnabled, host.hstsSubdomains, host.trustForwardedProto, host.meta)
@@ -154,7 +159,9 @@ class ProxyHostEditorViewModel(graph: AppGraph, id: Int) : HostEditorViewModel<P
         allowWebsocketUpgrade = websockets,
         accessListId = accessListId,
         advancedConfig = advanced,
-        locations = locations.map { LocationRequest(it.path.trim(), it.scheme, it.host.trim(), it.port.toInt(), it.advanced) },
+        locations = locations.map {
+            LocationRequest(it.path.trim(), it.scheme, it.host.trim(), it.port.toInt(), it.advanced, accessListId = it.accessListId.takeIf { id -> id != 0 })
+        },
         meta = ssl.letsEncryptMeta(),
     )
 
@@ -168,7 +175,15 @@ fun ProxyHostEditor(nav: NavHostController, id: Int) {
     val vm: ProxyHostEditorViewModel = viewModel(key = "proxy-$id") { ProxyHostEditorViewModel(graph, id) }
     val acls by graph.repository.accessListList.collectAsStateWithLifecycle()
     LaunchedEffect(Unit) { graph.repository.accessLists.ensure() }
+    val session by graph.session.state.collectAsStateWithLifecycle()
+    // Per-location access lists exist since NPM 2.16; older servers reject the key. Unknown version: offer it.
+    val npmVersion = NpmVersion.parse((session as? SessionState.SignedIn)?.account?.npmVersion)
+    val locationAcls = npmVersion == null || npmVersion >= NpmVersion.LOCATION_ACCESS_LISTS
     val err = vm.showErrors
+
+    fun aclOptions(current: Int) = listOf(Triple(0, "Publicly accessible", "No access list")) +
+        acls.data.orEmpty().map { Triple(it.id, it.name, "${it.items.size} users · ${it.clients.size} rules") } +
+        (if (current != 0 && acls.data?.none { it.id == current } == true) listOf(Triple(current, "Access list #$current", null)) else emptyList())
 
     HostEditorScaffold(nav, vm, listOf("Details", "Locations", "SSL", "Advanced"), openDomain = vm.domains.firstOrNull { !it.startsWith("*") }) { tab ->
         when (tab) {
@@ -183,10 +198,7 @@ fun ProxyHostEditor(nav: NavHostController, id: Int) {
                     SwitchRow("Block common exploits", vm.blockExploits, { vm.blockExploits = it })
                     SwitchRow("Websockets support", vm.websockets, { vm.websockets = it })
                 }
-                val options = listOf(Triple(0, "Publicly accessible", "No access list")) +
-                    acls.data.orEmpty().map { Triple(it.id, it.name, "${it.items.size} users · ${it.clients.size} rules") } +
-                    (if (vm.accessListId != 0 && acls.data?.none { it.id == vm.accessListId } == true) listOf(Triple(vm.accessListId, "Access list #${vm.accessListId}", null)) else emptyList())
-                DropdownField("Access list", options, vm.accessListId, { vm.accessListId = it }, leadingIcon = AppIcons.AccessList)
+                DropdownField("Access list", aclOptions(vm.accessListId), vm.accessListId, { vm.accessListId = it }, leadingIcon = AppIcons.AccessList)
             }
             1 -> {
                 InfoBanner("Custom locations forward a path (like /api) to a different backend. The target may include a path: 10.0.0.5/app.", icon = AppIcons.Route)
@@ -201,6 +213,9 @@ fun ProxyHostEditor(nav: NavHostController, id: Int) {
                             SegmentedPicker(listOf("http" to "http", "https" to "https"), loc.scheme, { loc.scheme = it })
                             FormTextField(loc.host, { loc.host = it }, "Hostname or IP (optionally /path)", error = if (err) loc.hostError else null)
                             NumberField(loc.port, { loc.port = it }, "Port", error = if (err) loc.portError else null)
+                            if (locationAcls || loc.accessListId != 0) {
+                                DropdownField("Access list", aclOptions(loc.accessListId), loc.accessListId, { loc.accessListId = it }, leadingIcon = AppIcons.AccessList)
+                            }
                             FormTextField(loc.advanced, { loc.advanced = it }, "Custom configuration (optional)", singleLine = false, minLines = 2, mono = true)
                         }
                     }

@@ -1,6 +1,6 @@
 # NPM Mobile: notes for Claude sessions
 
-Native Android client (Kotlin + Jetpack Compose) for Nginx Proxy Manager. **Read `ARCHITECTURE.md` first.** It is
+Native Android client (Kotlin + Jetpack Compose) for Nginx Proxy Manager. **Read `AGENTS.md` and `ARCHITECTURE.md` first.** The latter is
 the design source of truth, including the NPM API quirks the code depends on (§3).
 
 ## Commands
@@ -8,7 +8,8 @@ the design source of truth, including the NPM API quirks the code depends on (§
   (JDK 21; Android SDK at `/opt/android-sdk` via `local.properties`, which isn't committed).
 - Live tests against a disposable NPM: `scripts/dev-npm.sh up`, then export the printed `NPM_IT_URL`,
   `NPM_IT_EMAIL` and `NPM_IT_PASSWORD` and rerun the tests (`LiveNpmTest` and `LiveAppFlowTest` are skipped without them).
-  `scripts/dev-npm.sh down` removes the container. `NPM_VERSION=2.16.0 scripts/dev-npm.sh up` tests another release.
+  `scripts/dev-npm.sh down` removes the container. It starts NPM 2.16.0 (= CI); `NPM_VERSION=2.15.1 scripts/dev-npm.sh up`
+  tests the older release (delete the container first: the name is fixed).
 - Screenshots of every screen with sample data: `./gradlew :app:recordRoborazziDebug --tests '*ScreenshotTest*'`
   writes `app/build/screenshots/*.png`; look at them after UI changes. README images are copies in `docs/screenshots/`.
   (Robolectric renders no system bars: check inset changes on the emulator.)
@@ -31,7 +32,9 @@ the design source of truth, including the NPM API quirks the code depends on (§
   `SessionManager.call {}` (token renewal and re-auth). Nothing may throw on OkHttp threads.
 - ViewModels: catch `Exception`, rethrow `CancellationException`, and show `toUiError()`. Don't swallow errors silently.
 - Hide actions the NPM user may not perform (`User.canManage(Section)`): NPM 2.15.1 answers a denied write with a
-  500, not a 403.
+  500, not a 403 (2.16 sends 403).
+- Editors must send back every field NPM returned for nested objects they rewrite (e.g. a location's
+  `access_list_id` since 2.16): a missing key resets it. Add new NPM fields to both the model and the request.
 - Never log or display tokens, passwords, DNS provider credentials or private keys. Secrets are stored only through
   `AccountStore` (Keystore-encrypted).
 - Release builds use R8 (shrink + optimize, `-dontobfuscate` so crash reports stay readable). Unit tests run

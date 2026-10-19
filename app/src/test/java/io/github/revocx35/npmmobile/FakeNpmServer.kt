@@ -69,7 +69,7 @@ object Demo {
         ProxyHost(2, ago(250), ago(12), 1, listOf("jellyfin.example.com", "media.example.com"), "http", "10.0.0.21", 8096, 1, 1, sslForced = true, blockExploits = true, meta = online, allowWebsocketUpgrade = true, http2Support = true, certificate = wildcard, owner = admin, accessList = family),
         ProxyHost(
             3, ago(200), ago(1), 1, listOf("grafana.example.com"), "http", "monitoring", 3000, 0, 1, sslForced = true, meta = online, http2Support = true, certificate = wildcard, owner = admin,
-            locations = listOf(ProxyLocation(path = "/api/live", forwardHost = "monitoring", forwardPort = 3000, forwardScheme = "http"), ProxyLocation(path = "/loki", forwardHost = "10.0.0.25", forwardPort = 3100, forwardScheme = "http")),
+            locations = listOf(ProxyLocation(path = "/api/live", forwardHost = "monitoring", forwardPort = 3000, forwardScheme = "http"), ProxyLocation(path = "/loki", forwardHost = "10.0.0.25", forwardPort = 3100, forwardScheme = "http", accessListId = 2)),
         ),
         ProxyHost(
             4, ago(100), ago(0), 1, listOf("homeassistant.example.com"), "http", "10.0.0.30", 8123, 0, 1, sslForced = true, owner = admin, certificate = wildcard, allowWebsocketUpgrade = true,
@@ -164,7 +164,7 @@ class FakeNpmServer(private val password: String = "demo-pass") : AutoCloseable 
             path == "/version/check" -> one(VersionCheck.serializer(), VersionCheck("v2.15.1", "v2.16.0", true))
             path == "/nginx/proxy-hosts" && method == "POST" -> createProxyHost(body)
             path == "/nginx/proxy-hosts" -> list(ProxyHost.serializer(), proxyHosts)
-            path.startsWith("/nginx/proxy-hosts/") -> proxyHostAction(method, path)
+            path.startsWith("/nginx/proxy-hosts/") -> proxyHostAction(method, path, body)
             path == "/nginx/redirection-hosts" -> list(RedirectionHost.serializer(), Demo.redirections)
             path.startsWith("/nginx/redirection-hosts/") -> one(RedirectionHost.serializer(), Demo.redirections.first { it.id == path.substringAfterLast('/').toInt() })
             path == "/nginx/streams" -> list(Stream.serializer(), Demo.streams)
@@ -199,11 +199,21 @@ class FakeNpmServer(private val password: String = "demo-pass") : AutoCloseable 
         return json(NpmJson.encodeToString(ProxyHost.serializer(), host), 201)
     }
 
-    private fun proxyHostAction(method: String, path: String): MockResponse {
+    private fun proxyHostAction(method: String, path: String, body: String): MockResponse {
         val id = path.removePrefix("/nginx/proxy-hosts/").substringBefore('/').toInt()
         val host = proxyHosts.firstOrNull { it.id == id } ?: return json("""{"error":{"code":404,"message":"Not Found"}}""", 404)
         return when {
             method == "DELETE" -> { proxyHosts.remove(host); json("true") }
+            method == "PUT" -> {
+                // Like NPM: the body replaces the host's fields (a location sent without access_list_id loses it).
+                val merged = buildJsonObject {
+                    NpmJson.encodeToJsonElement(ProxyHost.serializer(), host).jsonObject.forEach { (k, v) -> put(k, v) }
+                    NpmJson.parseToJsonElement(body).jsonObject.forEach { (k, v) -> if (k != "certificate_id") put(k, v) }
+                }
+                val updated = NpmJson.decodeFromJsonElement(ProxyHost.serializer(), merged)
+                proxyHosts[proxyHosts.indexOf(host)] = updated
+                one(ProxyHost.serializer(), updated)
+            }
             path.endsWith("/enable") || path.endsWith("/disable") -> {
                 proxyHosts[proxyHosts.indexOf(host)] = host.copy(enabled = path.endsWith("/enable"))
                 json("true")

@@ -13,22 +13,30 @@ import org.junit.Test
 /**
  * NPM rejects request bodies with keys its JSON schema doesn't list (`additionalProperties: false`).
  * This encodes a fully populated instance of every request class and checks each key (recursively) against
- * the OpenAPI schema served by NPM 2.15.1 (`GET /api/schema`, saved in src/test/resources). Update the saved
- * schema when targeting a newer NPM and this test will point at anything that changed.
+ * the OpenAPI schemas served by every supported NPM release (`GET /api/schema`, saved in src/test/resources).
+ * Add the schema of a newer NPM to [VERSIONS] and this test will point at anything that changed.
  */
 class SchemaConformanceTest {
-    private val schema = NpmJson.parseToJsonElement(javaClass.getResource("/npm-2.15.1-schema.json")!!.readText()).jsonObject
+    private companion object {
+        val VERSIONS = listOf("2.15.1", "2.16.0")
+    }
 
-    private fun bodySchema(path: String, method: String): JsonObject {
+    private val schemas = VERSIONS.associateWith {
+        NpmJson.parseToJsonElement(javaClass.getResource("/npm-$it-schema.json")!!.readText()).jsonObject
+    }
+
+    private fun bodySchema(schema: JsonObject, path: String, method: String): JsonObject {
         val op = schema["paths"]!!.jsonObject[path]!!.jsonObject[method]!!.jsonObject
         val content = op["requestBody"]!!.jsonObject["content"]!!.jsonObject
         return (content["application/json"] ?: content.values.first()).jsonObject["schema"]!!.jsonObject
     }
 
-    private fun <T> check(path: String, method: String, serializer: SerializationStrategy<T>, value: T, requireAll: Boolean = true) {
+    private fun <T> check(
+        path: String, method: String, serializer: SerializationStrategy<T>, value: T, requireAll: Boolean = true, versions: List<String> = VERSIONS,
+    ) {
         val encoded = NpmJson.encodeToJsonElement(serializer, value)
         val problems = mutableListOf<String>()
-        compare(encoded, bodySchema(path, method), "$method $path", problems, requireAll)
+        versions.forEach { compare(encoded, bodySchema(schemas.getValue(it), path, method), "NPM $it: $method $path", problems, requireAll) }
         assertTrue(problems.joinToString("\n"), problems.isEmpty())
     }
 
@@ -84,6 +92,19 @@ class SchemaConformanceTest {
         )
         check("/nginx/proxy-hosts", "post", ProxyHostRequest.serializer(), body)
         check("/nginx/proxy-hosts/{hostID}", "put", ProxyHostRequest.serializer(), body.copy(certificateId = CertificateRef.Existing(3), meta = null))
+
+        // Per-location access lists only exist since 2.16 (2.15 rejects the key, so it is left out when null).
+        val withAcl = body.copy(locations = listOf(LocationRequest("/admin", "http", "10.0.0.3", 81, accessListId = 4)), meta = null)
+        check("/nginx/proxy-hosts/{hostID}", "put", ProxyHostRequest.serializer(), withAcl, versions = listOf("2.16.0"))
+        assertTrue("access_list_id" !in NpmJson.encodeToString(LocationRequest.serializer(), LocationRequest("/a", "http", "h", 1)))
+    }
+
+    @Test fun locationAccessListsNeedNpm216() {
+        assertTrue("access_list_id" in schemas.getValue("2.16.0").toString())
+        assertTrue(NpmVersion.parse("2.16.0")!! >= NpmVersion.LOCATION_ACCESS_LISTS)
+        assertTrue(NpmVersion.parse("v2.17")!! >= NpmVersion.LOCATION_ACCESS_LISTS)
+        assertTrue(NpmVersion.parse("2.15.1")!! < NpmVersion.LOCATION_ACCESS_LISTS)
+        assertTrue(NpmVersion.parse(null) == null && NpmVersion.parse("dev") == null && NpmVersion.parse("") == null)
     }
 
     @Test fun redirectionDeadStream() {

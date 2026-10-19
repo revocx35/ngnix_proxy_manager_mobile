@@ -26,6 +26,18 @@ data class HealthStatus(
 data class NpmVersion(val major: Int = 0, val minor: Int = 0, val revision: Int = 0) : Comparable<NpmVersion> {
     override fun toString() = "$major.$minor.$revision"
     override fun compareTo(other: NpmVersion) = compareValuesBy(this, other, { it.major }, { it.minor }, { it.revision })
+
+    companion object {
+        /** First release whose custom locations take an `access_list_id`. */
+        val LOCATION_ACCESS_LISTS = NpmVersion(2, 16, 0)
+
+        /** Parses "2.16.0" (as stored with an account); null if it isn't a version. */
+        fun parse(text: String?): NpmVersion? {
+            val parts = text?.trim()?.removePrefix("v")?.split('.')?.map { it.toIntOrNull() ?: return null } ?: return null
+            if (parts.isEmpty() || parts.size > 3) return null
+            return NpmVersion(parts[0], parts.getOrElse(1) { 0 }, parts.getOrElse(2) { 0 })
+        }
+    }
 }
 
 /** `POST /tokens` answers with either a token or a 2FA challenge. */
@@ -134,6 +146,8 @@ data class ProxyLocation(
     val forwardPort: Int = 80,
     val forwardPath: String? = null,
     val advancedConfig: String? = null,
+    /** Per-path access list (NPM 2.16+); 0 = none. */
+    val accessListId: Int = 0,
 )
 
 @Serializable

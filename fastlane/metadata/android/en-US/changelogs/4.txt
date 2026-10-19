@@ -1,0 +1,2 @@
+* Nginx Proxy Manager 2.16: saving a proxy host no longer removes the access lists of its custom locations
+* Custom locations can have their own access list (NPM 2.16 and newer)

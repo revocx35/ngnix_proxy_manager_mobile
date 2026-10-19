@@ -43,7 +43,7 @@ Download the APK from [Releases](https://github.com/revocx35/ngnix_proxy_manager
 (Android 8.0+). Then enter your NPM **admin** address, e.g. `npm.example.com` or `http://192.168.1.10:81`, and sign
 in with your NPM account.
 
-Tested against **Nginx Proxy Manager 2.15.1**. Other 2.x versions with the same API should work.
+Tested against **Nginx Proxy Manager 2.15.1 and 2.16.0**. Other 2.x versions with the same API should work.
 
 ## Security
 

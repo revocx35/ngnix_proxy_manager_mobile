@@ -66,6 +66,11 @@ data class LocationRequest(
     val forwardHost: String,
     val forwardPort: Int,
     val advancedConfig: String = "",
+    /**
+     * Per-path access list, NPM 2.16+ only. Left out when null: 2.15 rejects the key, and 2.16 drops a location's
+     * access list when the key is missing, so a loaded value must always be sent back.
+     */
+    val accessListId: Int? = null,
 )
 
 @Serializable
