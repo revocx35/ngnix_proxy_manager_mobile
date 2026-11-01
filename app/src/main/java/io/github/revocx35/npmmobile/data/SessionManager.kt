@@ -6,6 +6,7 @@ import io.github.revocx35.npmmobile.core.NpmClient
 import io.github.revocx35.npmmobile.core.NpmException
 import io.github.revocx35.npmmobile.core.ServerAddress
 import io.github.revocx35.npmmobile.core.User
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -153,7 +154,14 @@ class SessionManager(
             return true
         }
         val password = withContext(background) { store.password(fresh) } ?: return false
-        val result = runCatching { newClient(fresh.address).login(fresh.email, password) }.getOrNull()
+        // A cancelled caller (the user left the screen) must not read as "wrong password" and end the session.
+        val result = try {
+            newClient(fresh.address).login(fresh.email, password)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (_: Exception) {
+            null
+        }
         val token = (result as? NpmClient.LoginResult.Success)?.token ?: return false
         saveToken(fresh, client, token)
         true
