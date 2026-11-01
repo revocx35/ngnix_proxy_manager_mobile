@@ -82,6 +82,20 @@ class NpmClientTest {
         assertEquals("""{"challenge_token":"CH","code":"123456"}""", server.takeRequest().body?.utf8())
     }
 
+    @Test fun twoFactorCodesAreCleanedAndEncoded() = runBlocking {
+        server.enqueue(json("true"))
+        client.disableTwoFactor(7, " 123 456&x ")
+        assertEquals("/api/users/7/2fa?code=123456%26x", server.takeRequest().target)
+
+        server.enqueue(json("""{"backup_codes":["a"]}"""))
+        client.enableTwoFactor(7, "123 456")
+        assertEquals("""{"code":"123456"}""", server.takeRequest().body?.utf8())
+
+        server.enqueue(json("""{"backup_codes":["a"]}"""))
+        client.regenerateBackupCodes(7, "123 456")
+        assertEquals("""{"code":"123456"}""", server.takeRequest().body?.utf8())
+    }
+
     @Test fun wrongPasswordIsAnApiErrorWithNpmsMessage() = runBlocking {
         server.enqueue(json("""{"error":{"code":400,"message":"Invalid email or password","message_i18n":"error.invalid-auth"}}""", 400))
         val e = expect<NpmException.Api> { runBlocking { client.login("a@b.c", "x") } }

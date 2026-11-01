@@ -244,16 +244,19 @@ class NpmClient(
 
     /** Confirms the setup with a code from the authenticator app and returns the backup codes. */
     suspend fun enableTwoFactor(userId: Int, code: String): BackupCodes =
-        call(POST, "users/$userId/2fa/enable", true, BackupCodes.serializer(), TwoFactorCodeRequest.serializer(), TwoFactorCodeRequest(code.trim()))
+        call(POST, "users/$userId/2fa/enable", true, BackupCodes.serializer(), TwoFactorCodeRequest.serializer(), TwoFactorCodeRequest(cleanCode(code)))
 
     suspend fun disableTwoFactor(userId: Int, code: String) {
-        action(DELETE, "users/$userId/2fa?code=${code.trim()}")
+        action(DELETE, "users/$userId/2fa?code=" + java.net.URLEncoder.encode(cleanCode(code), "UTF-8"))
     }
 
     suspend fun regenerateBackupCodes(userId: Int, code: String): BackupCodes = call(
         POST, "users/$userId/2fa/backup-codes", true, BackupCodes.serializer(),
-        TwoFactorCodeRequest.serializer(), TwoFactorCodeRequest(code.trim()),
+        TwoFactorCodeRequest.serializer(), TwoFactorCodeRequest(cleanCode(code)),
     )
+
+    /** Authenticator apps show codes as "123 456"; NPM wants them without the space (and the query string needs encoding). */
+    private fun cleanCode(code: String) = code.filterNot { it.isWhitespace() }
 
     // ---- Settings & audit log ------------------------------------------------------------------------
 
