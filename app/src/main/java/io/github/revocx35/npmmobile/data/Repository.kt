@@ -57,10 +57,14 @@ class Cached<T>(private val scope: CoroutineScope, private val loader: suspend (
             _state.value = try {
                 Resource(loader(), loading = false, error = null)
             } catch (e: CancellationException) {
-                _state.value.copy(loading = false)
+                // Not a failure, but the spinner must stop: `ensure()` never loads while `loading` is set.
+                _state.value = _state.value.copy(loading = false)
                 throw e
             } catch (e: NpmException) {
                 _state.value.copy(loading = false, error = e.message)
+            } catch (e: Exception) {
+                _state.value = _state.value.copy(loading = false, error = e.message ?: "Unexpected error")
+                throw e
             }
         }
     }
