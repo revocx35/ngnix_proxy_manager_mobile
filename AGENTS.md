@@ -41,6 +41,7 @@ straight to NPM's REST API; there is no backend. Design details and the NPM API 
 - Never break reproducible builds (F-Droid ships our signed APK only if its build is byte-identical).
 
 ## Gotchas
+- Never wrap suspend calls in `runCatching` without rethrowing `CancellationException` (it made a cancelled silent re-login end the session; see `SessionManagerTest`). `Cached.load` must always reset `loading` (`CachedTest`). 2FA codes go through `NpmClient.cleanCode` (spaces stripped, query-encoded).
 - NPM 2.15.1 answers a denied write with 500; 2.16 with 403.
 - The NPM 2.16 image won't start without `/data` and `/etc/letsencrypt` volumes.
 - Robolectric runs SDK 35: Android 17's local network permission and R8 issues only show on the emulator.
